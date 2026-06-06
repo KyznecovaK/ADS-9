@@ -4,12 +4,12 @@
 
 #include "../include/tree.h"
 
-void PermutationGenerator::expand(PermNode* cur, std::vector<char>& rest) {
+void PMTree::expand(PMNode* cur, std::vector<char>& rest) {
   if (rest.empty()) {
     return;
   }
   for (size_t pos = 0; pos < rest.size(); ++pos) {
-    PermNode* newborn = new PermNode(rest[pos]);
+    PMNode* newborn = new PMNode(rest[pos]);
     cur->kids.push_back(newborn);
     std::vector<char> leftover;
     for (size_t idx = 0; idx < rest.size(); ++idx) {
@@ -21,37 +21,37 @@ void PermutationGenerator::expand(PermNode* cur, std::vector<char>& rest) {
   }
 }
 
-PermutationGenerator::PermutationGenerator(std::vector<char> items) {
-  head = new PermNode('\0');
-  expand(head, items);
+PMTree::PMTree(std::vector<char> items) {
+  root = new PMNode('\0');
+  expand(root, items);
 }
 
-PermutationGenerator::~PermutationGenerator() {
-  delete head;
+PMTree::~PMTree() {
+  delete root;
 }
 
-void walk(PermNode* node, std::vector<char>& acc,
-          std::vector<std::vector<char>>& collector) {
+void traverse(PMNode* node, std::vector<char>& acc,
+              std::vector<std::vector<char>>& collector) {
   if (node->kids.empty() && node->val != '\0') {
     collector.push_back(acc);
     return;
   }
   for (auto kid : node->kids) {
     acc.push_back(kid->val);
-    walk(kid, acc, collector);
+    traverse(kid, acc, collector);
     acc.pop_back();
   }
 }
 
-std::vector<std::vector<char>> extractAll(PermutationGenerator& gen) {
+std::vector<std::vector<char>> getAllPerms(PMTree& tree) {
   std::vector<std::vector<char>> collector;
   std::vector<char> acc;
-  walk(gen.getHead(), acc, collector);
+  traverse(tree.getRoot(), acc, collector);
   return collector;
 }
 
-std::vector<char> extractByNumLinear(PermutationGenerator& gen, int num) {
-  std::vector<std::vector<char>> all = extractAll(gen);
+std::vector<char> getPerm1(PMTree& tree, int num) {
+  std::vector<std::vector<char>> all = getAllPerms(tree);
   if (num < 1 || num > static_cast<int>(all.size())) {
     return std::vector<char>();
   }
@@ -67,24 +67,24 @@ static int64_t factorialCalc(int n) {
   return res;
 }
 
-std::vector<char> extractByNumDirect(PermutationGenerator& gen, int num) {
-  std::vector<std::vector<char>> all = extractAll(gen);
+std::vector<char> getPerm2(PMTree& tree, int num) {
+  std::vector<std::vector<char>> all = getAllPerms(tree);
   if (num < 1 || num > static_cast<int>(all.size())) {
     return std::vector<char>();
   }
   std::vector<char> result;
-  PermNode* cur = gen.getHead();
+  PMNode* cur = tree.getRoot();
   int remaining = num - 1;
   while (!cur->kids.empty()) {
     int branches = static_cast<int>(cur->kids.size());
-    int step = factorialCalc(branches - 1);
-    int chosen = remaining / step;
+    int64_t step = factorialCalc(branches - 1);
+    int chosen = remaining / static_cast<int>(step);
     if (chosen >= branches) {
       return std::vector<char>();
     }
     cur = cur->kids[chosen];
     result.push_back(cur->val);
-    remaining = remaining % step;
+    remaining = remaining % static_cast<int>(step);
   }
   return result;
 }
