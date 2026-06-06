@@ -5,36 +5,36 @@
 #include <cstdint>
 #include <vector>
 
-struct PermNode {
+struct PMNode {
   char val;
-  std::vector<PermNode*> kids;
+  std::vector<PMNode*> kids;
 
-  explicit PermNode(char ch) : val(ch) {}
+  explicit PMNode(char ch) : val(ch) {}
 
-  ~PermNode() {
+  ~PMNode() {
     for (auto kid : kids) {
       delete kid;
     }
   }
 };
 
-class PermutationGenerator {
+class PMTree {
  private:
-  PermNode* head;
+  PMNode* root;
 
-  void expand(PermNode* cur, std::vector<char>& rest);
+  void expand(PMNode* cur, std::vector<char>& rest);
 
  public:
-  explicit PermutationGenerator(std::vector<char> items);
-  ~PermutationGenerator();
+  explicit PMTree(std::vector<char> items);
+  ~PMTree();
 
-  PermNode* getHead() const { return head; }
+  PMNode* getRoot() const { return root; }
 };
 
-std::vector<std::vector<char>> extractAll(PermutationGenerator& gen);
+std::vector<std::vector<char>> getAllPerms(PMTree& tree);
 
-std::vector<char> extractByNumLinear(PermutationGenerator& gen, int num);
+std::vector<char> getPerm1(PMTree& tree, int num);
 
-std::vector<char> extractByNumDirect(PermutationGenerator& gen, int num);
+std::vector<char> getPerm2(PMTree& tree, int num);
 
 #endif  // INCLUDE_TREE_H_
